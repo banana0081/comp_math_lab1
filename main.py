@@ -42,20 +42,20 @@ def select_file():
         title='Open a file',
         initialdir=os.getcwd(),
         filetypes=filetypes)
-    try:
-        f = open(filename, 'r')
-        n = f.readline().split()
-        if len(n)!=1:
-            raise AttributeError
-        n = int(n[0])
-        a = []
-        for i in range(n):
-            line = [float(i) for i in f.readline().split()]
-            a.append(line)
-        b = [float(i) for i in f.readline().split()]
-        packed = solve(a, b, n)
-        showResults(packed)
-    except Exception as e:
+    """ try: """
+    f = open(filename, 'r')
+    n = f.readline().split()
+    if len(n)!=1:
+        raise AttributeError
+    n = int(n[0])
+    a = []
+    for j in range(n):
+        line = [float(i.replace(',', '.')) for i in f.readline().split()]
+        a.append(line)
+    b = [float(i) for i in f.readline().split()]
+    packed = solve(a, b, n)
+    showResults(packed)
+    """ except Exception as e:
         print(f'Ошибка: {e}')
         showResults('''Файл должен быть доступен для чтения, данные в файле должны быть представлены в следующем формате:
 n
@@ -73,7 +73,7 @@ b1 b2... bn
 10 -7 0
 -3 2 6
 5 -1 5
-7 4 6''')
+7 4 6''') """
         
 def input_matrix(n):
     global input_vector
@@ -167,7 +167,7 @@ def input_matrix(n):
     buttonsFrame = Frame(
                 master=newWindow,
                 relief=FLAT,
-                bg="red",
+                bg="#adadad",
                 height=80
             )
     frame = Frame(
@@ -194,7 +194,6 @@ def input_matrix(n):
 
 def input_vector(n, matrix, b):
     newWindow = Toplevel(root)
-    newWindow.resizable(False, False)
     def on_closing():
         newWindow.destroy()
     newWindow.protocol("WM_DELETE_WINDOW", on_closing)
@@ -252,14 +251,15 @@ def input_vector(n, matrix, b):
     mainFrame.grid(row=2, columnspan=n, sticky="E")
     frame = Frame(
                 master=newWindow,
-                relief=RAISED,
-                borderwidth=1
+                relief=FLAT,
+                height=80,
+                bg = '#adadad'
             )
-    frame.grid(row=3, columnspan=n, padx=10, pady=10)
     def ok_click():
         ok('')
     okbtn = Button(master=frame, text="ОК", width=10, height=1, font='roboto 10', command=ok_click)
     okbtn.pack()
+    frame.grid(row=3, columnspan=n, sticky="NSEW")
     newWindow.bind('<Return>', ok)
     fill()
 class App(Frame):
@@ -310,7 +310,15 @@ def main():
     app = App()
     root.mainloop()
 
-
+def savefileas(text):    
+    try:
+        path = fd.asksaveasfile(filetypes = (("Text files", "*.txt"), ("All files", "*.*"))).name
+    
+    except:
+        return   
+    
+    with open(path, 'w') as f:
+        f.write(text)
 
 def showResults(message):
     newWindow = Toplevel(root)
@@ -321,11 +329,28 @@ def showResults(message):
     newWindow.protocol("WM_DELETE_WINDOW", on_closing)
     newWindow.title("Решение")
     newWindow.geometry("800x600")
+    
     txt = scrolledtext.ScrolledText(newWindow, undo=True)
     txt['font'] = ('Courier New, monospace', '12')
-    txt.pack(expand=True, fill='both')
+    txt.pack(side=TOP, expand=1, fill=BOTH)
     txt.insert(INSERT, message)
     txt.configure(state=DISABLED)
+    buttonFrame = Frame(
+                master=newWindow,
+                relief=FLAT,
+                borderwidth=1,
+                height=120,
+                bg = '#adadad'
+            )
+    buttonFrame.pack(side=BOTTOM, expand=1, fill=BOTH)
+    def save():
+        savefileas(message)
+        on_closing()
+    savebtn = Button(buttonFrame, text="Save to file", width=10, borderwidth=1, height=1, font='roboto 10', command=save)
+    savebtn.pack(expand=1)
+    okbtn = Button(buttonFrame, text="Close", width=10, height=1, borderwidth=1, font='roboto 10', command=on_closing)
+    okbtn.pack(expand=1)
+    
     
 def showLargeMessage(message, title):
     newWindow = Toplevel(root)

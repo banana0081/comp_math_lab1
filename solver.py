@@ -48,10 +48,14 @@ def solve(a, b, n):
             for j in range(k, n):
                 a[i][j] -= div*a[k][j]
     packed+=('\nТреугольный вид матрицы: \n')
-    print_extended_matrix(a, b,n)
     det = 1
     for k in range(n):
         det*=a[k][k]
+    print_extended_matrix(a, b,n)
+    if len(restoration)%2==1:
+        det = -det
+    packed+=(f'\nОпределитель: {det}\n')
+
     if abs(det) < 10**-8: #Т.к. операции с плав. точкой, проверку на нулевой определитель реализуем с точностью до 1e-8
         packed+=('Нулевой определитель, СЛАУ неопределенная или несовместная')
         return packed
@@ -67,6 +71,7 @@ def solve(a, b, n):
     packed+=('\nВектор невязок: \n')
     print_vector(restore(r))
     packed+=('\n')
+    restoration.clear()
     return packed
 
 def generate_random_solvable(n):
